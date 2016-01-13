@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>cli</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="browser-app.html">
+                  browser-app.js
+                </a>
+              
+                
+                <a class="source" href="calculate-rpn.html">
+                  calculate-rpn.js
+                </a>
+              
+                
+                <a class="source" href="cli.html">
+                  cli.js
+                </a>
+              
+                
+                <a class="source" href="common-ops.html">
+                  common-ops.js
+                </a>
+              
+                
+                <a class="source" href="input-error-messages.html">
+                  input-error-messages.js
+                </a>
+              
+                
+                <a class="source" href="input-types.html">
+                  input-types.js
+                </a>
+              
+                
+                <a class="source" href="validate-rpn.html">
+                  validate-rpn.js
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-meta">"use strict"</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <h1 id="cli">cli</h1>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> readline = <span class="hljs-built_in">require</span>(<span class="hljs-string">"readline"</span>);
+<span class="hljs-keyword">var</span> rpn = <span class="hljs-built_in">require</span>(<span class="hljs-string">"../"</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Simple data structure for representing command line commands, such as &#39;help&#39; or &#39;quit&#39;.</p>
+<ul>
+<li>aliases - (Array[String])|(String) A list of words used to trigger the
+command, or a single word if passing a string.</li>
+<li>help - (String) The help text.</li>
+<li>fn - (Function) The function that should be executed. Will get a <code>CliApp</code>
+instance as it&#39;s only argument.</li>
+</ul>
+<p>Returns a Command instance.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Command</span>(<span class="hljs-params">aliases, help, fn</span>) </span>{
+  <span class="hljs-keyword">if</span> (!(<span class="hljs-keyword">this</span> <span class="hljs-keyword">instanceof</span> Command)) {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Command(aliases, help, fn);
+  }
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> aliases === <span class="hljs-string">"string"</span>) {
+    <span class="hljs-keyword">this</span>.aliases = [aliases];
+  } <span class="hljs-keyword">else</span> {
+    <span class="hljs-keyword">this</span>.aliases = aliases;
+  }
+  <span class="hljs-keyword">this</span>.help = help;
+  <span class="hljs-keyword">this</span>.fn = fn;
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Determines whether the given word is a commmand.</p>
+<ul>
+<li>v - (String) The word to test.</li>
+</ul>
+<p>Returns boolean.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">isCommand</span>(<span class="hljs-params">v</span>) </span>{
+  <span class="hljs-keyword">return</span> (<span class="hljs-keyword">typeof</span> commandMap[v] !== <span class="hljs-string">"undefined"</span>);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>The list of available command line commands.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> commands = [
+  Command([<span class="hljs-string">"?"</span>, <span class="hljs-string">"help"</span>], <span class="hljs-string">"Prints the command and operator list."</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">app</span>) </span>{ app.printHelp(); }),
+  Command([<span class="hljs-string">"q"</span>, <span class="hljs-string">"quit"</span>], <span class="hljs-string">"Quit the application."</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">app</span>) </span>{ app.exit(); }),
+  Command([<span class="hljs-string">"p"</span>, <span class="hljs-string">"print"</span>], <span class="hljs-string">"Prints the full stack."</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">app</span>) </span>{ app.printHelp(); }),
+  Command([<span class="hljs-string">"e"</span>, <span class="hljs-string">"empty"</span>], <span class="hljs-string">"Clears the stack."</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">app</span>) </span>{ app.emptyStack(); }),
+  Command([<span class="hljs-string">"simple"</span>], <span class="hljs-string">"Sets the prompt to show only '&gt;'."</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">app</span>) </span>{ app.setPrompt(<span class="hljs-string">"simple"</span>); }),
+  Command([<span class="hljs-string">"stack"</span>], <span class="hljs-string">"Sets the prompt to show the stack."</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">app</span>) </span>{ app.setPrompt(<span class="hljs-string">"stack"</span>); })
+];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Makes command lookups faster and easier when given input.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> commandMap = commands.reduce(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">commandReduce</span>(<span class="hljs-params">accu, v</span>) </span>{
+  v.aliases.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">cmd</span>) </span>{
+    accu[cmd] = v;
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+  });
+  <span class="hljs-keyword">return</span> accu;
+}, {});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>This string will be used when invoking the &#39;help&#39; command.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> commandHelp = commands.map(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">commandHelpMap</span>(<span class="hljs-params">v</span>) </span>{
+  <span class="hljs-keyword">return</span> v.aliases.join(<span class="hljs-string">", "</span>) + <span class="hljs-string">" - "</span> + v.help;
+}).join(<span class="hljs-string">"\n"</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p><code>CliApp</code> provides the command line interface to both readline and the rpn
+functionality. All of it&#39;s prototype functions should be considered to have
+potential side effects.</p>
+<ul>
+<li>promptStyle - (String) The style of prompt to start the application with.<ul>
+<li>&#39;simple&#39; Will just display &#39;&gt; &#39;</li>
+<li>&#39;stack&#39; Will display a truncated list of the stack beforhand, e.g.
+<code>[ 1 5 4 ]</code>. See the <code>makePromptString</code> function for more information.</li>
+</ul>
+</li>
+<li>operators - (Object) Map of operators in the form
+(operator word): (operator function), e.g. <code>{ &quot;+&quot;: v1, v2 =&gt; v1 + v2 }</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">CliApp</span>(<span class="hljs-params">operators, promptStyle</span>) </span>{
+  <span class="hljs-keyword">if</span> (!(<span class="hljs-keyword">this</span> <span class="hljs-keyword">instanceof</span> CliApp)) {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> CliApp(promptStyle);
+  }
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span>(promptStyle === <span class="hljs-string">"undefined"</span>)) {
+    promptStyle = <span class="hljs-string">"stack"</span>;
+  }
+  <span class="hljs-keyword">this</span>.state = {
+    stack: [],
+    promptStyle: promptStyle
+  };
+  <span class="hljs-keyword">this</span>.operators = operators;
+  <span class="hljs-keyword">this</span>.rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Starts the application.</p>
+<p>Returns null.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>CliApp.prototype.run = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">this</span>.printWelcome();
+  <span class="hljs-keyword">this</span>.showPrompt();
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Displays the prompt and waits for input.</p>
+<p>Returns null;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>CliApp.prototype.showPrompt  = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">showPrompt</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">this</span>.rl.question(makePromptString(<span class="hljs-keyword">this</span>.state.promptStyle, <span class="hljs-keyword">this</span>.state.stack), <span class="hljs-keyword">this</span>.processInput.bind(<span class="hljs-keyword">this</span>));
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+};
+
+CliApp.prototype.processInput = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">processInput</span>(<span class="hljs-params">input</span>) </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Sanitize the input.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> v = input.trim();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>If it&#39;s a command, call the command function.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span> (isCommand(v)) {
+    commandMap[v].fn(<span class="hljs-keyword">this</span>);
+  } <span class="hljs-keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>At this point, it&#39;s treated as non command input, so check if it&#39;s valid.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> valid = rpn.validation.validate(v, <span class="hljs-keyword">this</span>.state.stack, <span class="hljs-built_in">Object</span>.keys(<span class="hljs-keyword">this</span>.operators));
+    <span class="hljs-keyword">if</span> (valid.error) {
+      <span class="hljs-keyword">this</span>.printError(valid.message);
+    } <span class="hljs-keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>We&#39;ve got valid input. Add it to the stack and calculate the new stack.
+Make sure to cast to a Number if that&#39;s its type, otherwise it will go
+in as a string and JavaScript will get all wat-ty when doing arithmetic.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">var</span> stackAddition;
+      <span class="hljs-keyword">if</span> (valid.type === rpn.inputTypes.NUMBER) {
+        stackAddition = [<span class="hljs-built_in">Number</span>(v)];
+      } <span class="hljs-keyword">else</span> {
+        stackAddition = [v];
+      }
+      <span class="hljs-keyword">this</span>.state.stack = rpn.calculate(<span class="hljs-keyword">this</span>.state.stack.concat(stackAddition), <span class="hljs-keyword">this</span>.operators);
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.state.stack.slice(<span class="hljs-number">-1</span>)[<span class="hljs-number">0</span>]);
+    }
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>Always reprompt (if a quit command was read, the program will end before this).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">this</span>.showPrompt();
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Prints an error message to the console.</p>
+<ul>
+<li>msg - (String) The error message to print.</li>
+</ul>
+<p>Returns null.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>CliApp.prototype.printError = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">printError</span>(<span class="hljs-params">msg</span>) </span>{
+  <span class="hljs-built_in">console</span>.error(<span class="hljs-string">"Error: "</span>, msg);
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Exits the application.</p>
+<p>Returns null.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>CliApp.prototype.exit = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">exit</span>(<span class="hljs-params"></span>) </span>{
+  process.exit(<span class="hljs-number">0</span>);
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>Clears the stack.</p>
+<p>Returns null.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>CliApp.prototype.emptyStack = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">emptyStack</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">this</span>.state.stack = [];
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>Prints the welcome message to the console.</p>
+<p>Returns null.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>CliApp.prototype.printWelcome = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">printWelcome</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">var</span> welcome = <span class="hljs-string">"Reverse Polish Notation Calculator v"</span> + rpn.version;
+  <span class="hljs-keyword">var</span> welcomeHelp = <span class="hljs-string">"? for help, q to exit."</span>;
+  <span class="hljs-built_in">console</span>.log(welcome, <span class="hljs-string">"\n"</span>, welcomeHelp);
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>Prints command line commands and available operators to the console.</p>
+<p>Returns null.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>CliApp.prototype.printHelp = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">printHelp</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Available operators: "</span>, <span class="hljs-built_in">Object</span>.keys(<span class="hljs-keyword">this</span>.operators).join(<span class="hljs-string">" "</span>));
+  <span class="hljs-built_in">console</span>.log(commandHelp);
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>Updates the prompt style state.</p>
+<ul>
+<li>promptStyle - (String) The style of prompt to start the application with.
+See the <code>makePromptString</code> function for more information.</li>
+</ul>
+<p>Returns null.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>CliApp.prototype.setPrompt = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setPrompt</span>(<span class="hljs-params">promptStyle</span>) </span>{
+  <span class="hljs-keyword">this</span>.state.promptStyle = promptStyle;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>Pure function for creating the command line prompt.</p>
+<ul>
+<li>promptStyle - (String) The style of prompt to start the application with.
+Currently accepts &#39;stack&#39; or &#39;simple&#39;, although any string but &#39;simple&#39;
+will result in the &#39;stack&#39; style being used.</li>
+<li>stack - (Array) The stack to show (if using the &#39;stack&#39; style).</li>
+<li>stackTruncate - (Number) <em>optional</em> Max items to show in the stack (before truncating).</li>
+</ul>
+<p>Returns string.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">makePromptString</span>(<span class="hljs-params">promptStyle, stack, stackTruncate</span>) </span>{
+  <span class="hljs-keyword">if</span> (promptStyle === <span class="hljs-string">"simple"</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">"&gt; "</span>;
+  }
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> stackTruncate === <span class="hljs-string">"undefined"</span>) {
+    stackTruncate = <span class="hljs-number">5</span>;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>Compress the output for empty stacks.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span> (!stack.length) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">"[] &gt; "</span>;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p><code>workingStack</code> is the possibly truncated stack.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> workingStack;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p><code>beforeString</code> is simply what we&#39;ll print before (it will vary based on
+whether we truncate as well).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> beforeString;
+  <span class="hljs-keyword">if</span> (stack.length &gt; stackTruncate) {
+    workingStack = stack.slice(<span class="hljs-number">-1</span> * stackTruncate);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>If truncated, make something like <code>[ (20 more)... 21 22 3 4 5 ]</code>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    beforeString = <span class="hljs-string">"[ ("</span> + (stack.length - stackTruncate) + <span class="hljs-string">" more)... "</span>;
+  } <span class="hljs-keyword">else</span> {
+    workingStack = stack;
+    beforeString = <span class="hljs-string">" [ "</span>;
+  }
+  <span class="hljs-keyword">var</span> numbers = workingStack.join(<span class="hljs-string">" "</span>);
+  <span class="hljs-keyword">return</span> beforeString + numbers + <span class="hljs-string">" ] &gt; "</span>;
+}
+
+<span class="hljs-built_in">module</span>.exports = {
+  CliApp: CliApp,
+  Command: Command,
+  commands: commands,
+  commandMap: commandMap
+};</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "name": "rpn-calc",
+  "version": "0.1.0",
+  "description": "Reverse Polish Notation Calculator, written as a programming sample.",
+  "main": "index.js",
+  "private": "true",
+  "bin": {
+    "rpn-calc": "bin/rpn.js"
+  },
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha test/",
+    "build": "npm run webpack && npm run docs",
+    "docs": "./scripts/gen-docs.js",
+    "cli": "./bin/rpn.js",
+    "webpack": "https://jashkenas.github.io/docco/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/littleloops/rpn-calc.git"
+  },
+  "author": "Dylan McDiarmid <dylan@litteloops.io>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/littleloops/rpn-calc/issues"
+  },
+  "homepage": "https://github.com/littleloops/rpn-calc#readme",
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "docco": "^0.7.0",
+    "glob": "^6.0.4",
+    "imports-loader": "^0.6.5",
+    "jscs": "^2.8.0",
+    "jshint": "^2.8.0",
+    "json-loader": "^0.5.4",
+    "mocha": "^2.3.4",
+    "webpack": "^1.12.11"
+  }
+}

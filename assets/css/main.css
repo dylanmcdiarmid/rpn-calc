@@ -1,0 +1,59 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Helvetica Neue', Helvetica, sans-serif;
+}
+
+#container {
+  max-width: 640px;
+  margin: 10px auto;
+}
+
+#rpn-input {
+  height: 32px;
+  font-size: 24px;
+  line-height: 32px;
+  border: 0;
+  border-bottom: 1px solid grey;
+  margin: 10px 0px;
+  outline: none;
+}
+
+.button-container {
+  margin: 10px 0px;
+}
+.button {
+  display: block;
+  color: #FFF;
+  background-color: #009ac9;
+  cursor: pointer;
+  font-size: 13px;
+  margin: 4px;
+  width: 60px;
+  padding: 4px 0px;
+  text-align: center;
+}
+
+#submit-button:hover {
+  background-color: #038bb4;
+}
+
+#clear-button {
+  background-color: #b90404;
+}
+
+#clear-button:hover {
+  background-color: #a10303;
+}
+
+#error-field {
+  margin: 5px 0px;
+  font-style: italic;
+  color: red;
+}
+
+input::-webkit-input-placeholder { font-size: 11px; }
+input::-moz-placeholder { font-size: 11px }
+input:-ms-input-placeholder { font-size: 11px; }
+input:-moz-placeholder { font-size: 11px; }
+

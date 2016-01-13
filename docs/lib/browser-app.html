@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>browser-app.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="browser-app.html">
+                  browser-app.js
+                </a>
+              
+                
+                <a class="source" href="calculate-rpn.html">
+                  calculate-rpn.js
+                </a>
+              
+                
+                <a class="source" href="cli.html">
+                  cli.js
+                </a>
+              
+                
+                <a class="source" href="common-ops.html">
+                  common-ops.js
+                </a>
+              
+                
+                <a class="source" href="input-error-messages.html">
+                  input-error-messages.js
+                </a>
+              
+                
+                <a class="source" href="input-types.html">
+                  input-types.js
+                </a>
+              
+                
+                <a class="source" href="validate-rpn.html">
+                  validate-rpn.js
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>browser-app.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-meta">"use strict"</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>A unidirectional GUI for interacting with RPN features. Uses a toy
+functional reactive implementation.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> rpn = <span class="hljs-built_in">require</span>(<span class="hljs-string">"../"</span>);
+<span class="hljs-keyword">var</span> <span class="hljs-built_in">window</span> = <span class="hljs-built_in">window</span> || {};
+<span class="hljs-keyword">var</span> requestAnimationFrame = <span class="hljs-built_in">window</span>.requestAnimationFrame || <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"requestAnimation frame not found."</span>);
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Instantiate this object and call <code>render</code> to run the browser interface.</p>
+<ul>
+<li>elements - (Object[Element]) A map containing the following
+DOM <code>Element</code>s:<ul>
+<li>input: The text input element where numbers/operations will be
+entered.</li>
+<li>submit: The button for submitting entered text.</li>
+<li>clear: The button for clearing text.</li>
+<li>error: The element to put error messages in.</li>
+<li>lastInStack: The element to display the last stack item in.</li>
+<li>fullStack: The element to display the entire stack in.</li>
+</ul>
+</li>
+<li>operators - (Object[Function]) A map of operator names to their functions.</li>
+</ul>
+<p>Returns BrowserApp instance.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">BrowserApp</span>(<span class="hljs-params">elements, operators</span>) </span>{
+  <span class="hljs-keyword">if</span> (!(<span class="hljs-keyword">this</span> <span class="hljs-keyword">instanceof</span> BrowserApp)) {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> BrowserApp(elements, operators);
+  }
+  <span class="hljs-keyword">this</span>.state = {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>For state that effects the view.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    app: {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>List of items in the stack (Array).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      stack: [],</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Timestamp indicating the last time a new word was submitted (Number).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      lastSubmitted: <span class="hljs-literal">null</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>The error messsage (String).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      error: <span class="hljs-literal">null</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>The default placeholder text for the input</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      placeholder: <span class="hljs-string">""</span>
+    },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Keep track of previous app state values.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    previous: {},</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Keeps track of state only needed by <code>BrowserApp</code>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    internal: {
+      firstRender: <span class="hljs-literal">false</span>,
+      isRendering: <span class="hljs-literal">false</span>
+    }
+  };
+  <span class="hljs-keyword">this</span>.elements = elements;
+  <span class="hljs-keyword">this</span>.operators = operators;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Setup the default placeholder text.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">this</span>.state.app.placeholder = <span class="hljs-string">"enter a number or any of "</span> +
+    <span class="hljs-built_in">Object</span>.keys(<span class="hljs-keyword">this</span>.operators).join(<span class="hljs-string">" "</span>);
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Changes the app state and triggers a new render.</p>
+<ul>
+<li>k - (String) The state key to change.</li>
+<li>v - (Any) The new value to change the state to.</li>
+</ul>
+<p>Returns null</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>BrowserApp.prototype.setState = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setState</span>(<span class="hljs-params">k, v</span>) </span>{
+  <span class="hljs-keyword">this</span>.state.app[k] = v;
+  <span class="hljs-keyword">this</span>.render();
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>We need to clone the state because otherwise updating a key in the app state
+object would also effect the previous state. This is a toy solution, in
+production it&#39;s best to use some sort of immutable data structure.</p>
+<p>Returns object.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>BrowserApp.prototype.cloneState = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">cloneState</span>(<span class="hljs-params"></span>) </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Alias app state.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> <span class="hljs-keyword">as</span> = <span class="hljs-keyword">this</span>.state.app;
+  <span class="hljs-keyword">return</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p><code>.slice(0)</code> is a quick way to clone an array.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    stack: <span class="hljs-keyword">as</span>.stack.slice(<span class="hljs-number">0</span>),
+    lastSubmitted: <span class="hljs-keyword">as</span>.lastSubmitted,
+    error: <span class="hljs-keyword">as</span>.error
+  };
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p><code>render</code> helps batch state changes to prevent layout thrashing by only
+calling functions that manipulate the dom on animation frames (by using
+<code>requestAnimationFrame</code>). Should be manually triggered when a new app is
+instantiated. After that, it will be called each time the state updates.</p>
+<p>Returns null</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>BrowserApp.prototype.render = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span>(<span class="hljs-params"></span>) </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>The internal state flag &quot;isRendering&quot; let&#39;s us safely ignore requests
+triggered by multiple app state updates. It will be reset to false once
+the <code>_render</code> callback is called.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.state.internal.isRendering) {
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+  }
+  <span class="hljs-keyword">var</span> self = <span class="hljs-keyword">this</span>;
+  <span class="hljs-keyword">this</span>.state.internal.isRendering = <span class="hljs-literal">true</span>;
+  requestAnimationFrame(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderCb</span>(<span class="hljs-params"></span>) </span>{
+    self._render(self.state.app, self.state.previous, self.elements);
+  });
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>Private rendering method. Triggers first time setup procedures, and
+refreshing the view.</p>
+<p>Returns null.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>BrowserApp.prototype._render = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_render</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">this</span>.state.internal.firstRender) {
+    <span class="hljs-keyword">this</span>.setupEvents();
+    <span class="hljs-keyword">this</span>.state.internal.firstRender = <span class="hljs-literal">true</span>;
+  }
+  refreshView(<span class="hljs-keyword">this</span>.state.app, <span class="hljs-keyword">this</span>.state.previous, <span class="hljs-keyword">this</span>.elements);
+  <span class="hljs-keyword">this</span>.state.previous = <span class="hljs-keyword">this</span>.cloneState();
+  <span class="hljs-keyword">this</span>.state.internal.isRendering = <span class="hljs-literal">false</span>;
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>Binds elements to DOM events.</p>
+<p>Returns null.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>BrowserApp.prototype.setupEvents = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setupEvents</span>(<span class="hljs-params"></span>) </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>Setup enter keypress event, which will usually trigger submit.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">this</span>.elements.input.addEventListener(<span class="hljs-string">"keypress"</span>, Events.onKeypress.bind(<span class="hljs-keyword">this</span>));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>Setup button submit event.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">this</span>.elements.submit.addEventListener(<span class="hljs-string">"click"</span>, Events.onSubmit.bind(<span class="hljs-keyword">this</span>));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>Setup button clear event.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">this</span>.elements.clear.addEventListener(<span class="hljs-string">"click"</span>, Events.onClear.bind(<span class="hljs-keyword">this</span>));
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>All DOM element manipulation is done within this function. It takes
+the current state, the previous state, and a list of dom elements, and
+then applies necessary changes to the DOM.</p>
+<ul>
+<li>cstate - (Object) State of the current render.</li>
+<li>pstate - (Object) State of the previous render.</li>
+<li>elements - (Object[Element]) Map of names to dom elements. See the
+<code>BrowserApp</code> function for more information.</li>
+</ul>
+<p>Returns null.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">refreshView</span>(<span class="hljs-params">cstate, pstate, elements</span>) </span>{
+  <span class="hljs-keyword">if</span> (cstate.lastSubmitted !== pstate.lastSubmitted) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>Clear the input if there has been a new submission</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    elements.input.value = <span class="hljs-string">""</span>;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>If the placeholder text has changed, update it</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span> (cstate.placeholder !== pstate.placeholder) {
+    elements.input.placeholder = cstate.placeholder;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>If there has been an error, show it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span> (cstate.error &amp;&amp; cstate.error !== pstate.error) {
+    elements.error.innerText = cstate.error;
+  } <span class="hljs-keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>Otherwise, clear the error if there was one.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (cstate.error !== pstate.error) {
+      elements.error.innerText = <span class="hljs-string">""</span>;
+    }
+  }
+  <span class="hljs-keyword">var</span> lastDisplay;
+  <span class="hljs-keyword">if</span> (!cstate.stack.length) {
+    lastDisplay = <span class="hljs-string">""</span>;
+  } <span class="hljs-keyword">else</span> {
+    lastDisplay = cstate.stack.slice(<span class="hljs-number">-1</span>)[<span class="hljs-number">0</span>];
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>If we wanted to further optimize this, there are a few things we could do.
+We could decide to only update this state if a new submission has been
+made (move it underneath the lastSubmitted conditional at the top). We
+could create a flag, or we could do a simple comparison on length.
+Depending on how that state gets updated in our app, each method has
+different tradeoffs. For now we&#39;ll choose the least optimized option,
+updating it anytime the state is updated.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  elements.lastInStack.innerText = <span class="hljs-built_in">String</span>(lastDisplay);
+  elements.fullStack.innerText = <span class="hljs-string">"[ "</span> + cstate.stack.join(<span class="hljs-string">" "</span>) + <span class="hljs-string">" ]"</span>;
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>Events are kept separate as a purely organizational choice. It is expected
+that they will be called with <code>BrowserApp</code> instance as their context.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> Events = {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>Triggered when a new word is submitted, either through click or keypress.</p>
+<ul>
+<li>e - (Object) <em>optional</em> Event object, will trigger preventDefault if
+available.</li>
+</ul>
+<p>Returns null.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  onSubmit: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onSubmit</span>(<span class="hljs-params">e</span>) </span>{
+    <span class="hljs-keyword">if</span> (e &amp;&amp; e.preventDefault) {
+      e.preventDefault();
+    }
+    <span class="hljs-keyword">var</span> v = <span class="hljs-keyword">this</span>.elements.input.value.trim();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>If the input field is empty, we don&#39;t need any state updates.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (!v) {
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p>Otherwise, we can definitely call this a submission.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.setState(<span class="hljs-string">"lastSubmitted"</span>, timestamp());</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <p>Run validation.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> valid = rpn.validation.validate(v, <span class="hljs-keyword">this</span>.state.app.stack, <span class="hljs-built_in">Object</span>.keys(<span class="hljs-keyword">this</span>.operators));
+    <span class="hljs-keyword">if</span> (valid.error) {
+      <span class="hljs-keyword">this</span>.setState(<span class="hljs-string">"error"</span>, valid.message);
+    } <span class="hljs-keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <p>Clear any errors and create the new stack, careful to cast the string
+to a number if it&#39;s of that type.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">var</span> stackAddition;
+      <span class="hljs-keyword">if</span> (valid.type === rpn.inputTypes.NUMBER) {
+        stackAddition = [<span class="hljs-built_in">Number</span>(v)];
+      } <span class="hljs-keyword">else</span> {
+        stackAddition = [v];
+      }
+      <span class="hljs-keyword">var</span> newStack = rpn.calculate(<span class="hljs-keyword">this</span>.state.app.stack.concat(stackAddition),
+                                   <span class="hljs-keyword">this</span>.operators);
+      <span class="hljs-keyword">this</span>.setState(<span class="hljs-string">"error"</span>, <span class="hljs-literal">null</span>);
+      <span class="hljs-keyword">this</span>.setState(<span class="hljs-string">"stack"</span>, newStack);
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+  },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-35">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              <p>Triggered when the user wants the stack cleared.</p>
+<p>Returns null.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  onClear: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onClear</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">this</span>.setState(<span class="hljs-string">"stack"</span>, []);
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+  },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-36">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-36">&#182;</a>
+              </div>
+              <p>Triggered when the user presses a key.</p>
+<ul>
+<li>e - (Object) Native event object from &#39;keypress&#39; event, required.</li>
+</ul>
+<p>Returns null.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  onKeypress: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onKeypress</span>(<span class="hljs-params">e</span>) </span>{
+    <span class="hljs-keyword">if</span> (e.keyCode === <span class="hljs-number">13</span>) {
+      Events.onSubmit.call(<span class="hljs-keyword">this</span>, e);
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+  }
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-37">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-37">&#182;</a>
+              </div>
+              <p>A simple wrapper for <code>Date#getTime</code>.</p>
+<p>Returns integer.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">timestamp</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">return</span> (<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>()).getTime();
+}
+
+<span class="hljs-built_in">module</span>.exports = BrowserApp;</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

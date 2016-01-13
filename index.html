@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8">
+  <title>Reverse Polish Notation Calculator</title>
+  <link rel="stylesheet" href="assets/css/main.css" />
+ </head>
+ <body>
+   <div id="container">
+     <h1>RPN Calculator</h1>
+     <div id="input-elements">
+       <input type="text" id="rpn-input"></input>
+       <div class="button-container">
+         <div class="button" id="submit-button">Submit</div>
+         <div class="button" id="clear-button">Clear</div>
+       </div>
+     </div>
+     <div id="error-field"></div>
+     <div id="info">
+       <div>
+         <span>Last Item: </span>
+         <span id="last-stack"></span>
+       </div>
+       <div>
+         <span>Full Stack: </span>
+         <span id="full-stack"></span>
+       </div>
+     </div>
+   </div>
+   <script src="assets/bundle.js"></script>
+ </body>
+</html>
