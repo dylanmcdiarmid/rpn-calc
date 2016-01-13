@@ -12,7 +12,7 @@
     "build": "npm run webpack && npm run docs",
     "docs": "./scripts/gen-docs.js",
     "cli": "./bin/rpn.js",
-    "webpack": "https://jashkenas.github.io/docco/"
+    "webpack": "./node_modules/webpack/bin/webpack.js browser.js assets/bundle.js"
   },
   "repository": {
     "type": "git",

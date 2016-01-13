@@ -45,12 +45,10 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
+	// Runs the browser app. Meant to be the main module called when building for
+	// the browser.
 	(function (root) {
 	  var document = root.document || {};
-	  // ## browser
-	  //
-	  // Runs the browser app. Meant to be the main module called when building for
-	  // the browser.
 
 	  var rpn = __webpack_require__(1);
 	  var BrowserApp = __webpack_require__(8);
@@ -67,7 +65,6 @@
 	    lastInStack: id("last-stack"),
 	    fullStack: id("full-stack")
 	  };
-
 
 	  // Manually trigger the first render.
 	  (new BrowserApp(elements, rpn.commonOps, root.requestAnimationFrame.bind(root))).render();
@@ -295,8 +292,10 @@
 		},
 		"scripts": {
 			"test": "./node_modules/mocha/bin/mocha test/",
-			"build": "node node_modules/webpack/bin/webpack.js browser.js assets/bundle.js && npm run docs",
-			"docs": "node scripts/gen-docs.js"
+			"build": "npm run webpack && npm run docs",
+			"docs": "./scripts/gen-docs.js",
+			"cli": "./bin/rpn.js",
+			"webpack": "./node_modules/webpack/bin/webpack.js browser.js assets/bundle.js"
 		},
 		"repository": {
 			"type": "git",

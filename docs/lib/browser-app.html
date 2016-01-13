@@ -94,11 +94,7 @@ functional reactive implementation.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> rpn = <span class="hljs-built_in">require</span>(<span class="hljs-string">"../"</span>);
-<span class="hljs-keyword">var</span> <span class="hljs-built_in">window</span> = <span class="hljs-built_in">window</span> || {};
-<span class="hljs-keyword">var</span> requestAnimationFrame = <span class="hljs-built_in">window</span>.requestAnimationFrame || <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-  <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"requestAnimation frame not found."</span>);
-};</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> rpn = <span class="hljs-built_in">require</span>(<span class="hljs-string">"../"</span>);</pre></div></div>
             
         </li>
         
@@ -123,12 +119,14 @@ entered.</li>
 </ul>
 </li>
 <li>operators - (Object[Function]) A map of operator names to their functions.</li>
+<li>raf - (Function) The function to use for requestAnimationFrame. Usually
+<code>window.requestAnimationFrame</code>.</li>
 </ul>
 <p>Returns BrowserApp instance.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">BrowserApp</span>(<span class="hljs-params">elements, operators</span>) </span>{
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">BrowserApp</span>(<span class="hljs-params">elements, operators, raf</span>) </span>{
   <span class="hljs-keyword">if</span> (!(<span class="hljs-keyword">this</span> <span class="hljs-keyword">instanceof</span> BrowserApp)) {
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> BrowserApp(elements, operators);
   }
@@ -244,7 +242,8 @@ entered.</li>
     }
   };
   <span class="hljs-keyword">this</span>.elements = elements;
-  <span class="hljs-keyword">this</span>.operators = operators;</pre></div></div>
+  <span class="hljs-keyword">this</span>.operators = operators;
+  <span class="hljs-keyword">this</span>.raf = raf;</pre></div></div>
             
         </li>
         
@@ -380,7 +379,7 @@ the <code>_render</code> callback is called.</p>
   }
   <span class="hljs-keyword">var</span> self = <span class="hljs-keyword">this</span>;
   <span class="hljs-keyword">this</span>.state.internal.isRendering = <span class="hljs-literal">true</span>;
-  requestAnimationFrame(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderCb</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">this</span>.raf(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderCb</span>(<span class="hljs-params"></span>) </span>{
     self._render(self.state.app, self.state.previous, self.elements);
   });
   <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
@@ -548,7 +547,7 @@ then applies necessary changes to the DOM.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span> (cstate.error &amp;&amp; cstate.error !== pstate.error) {
-    elements.error.innerText = cstate.error;
+    elements.error.textContent = cstate.error;
   } <span class="hljs-keyword">else</span> {</pre></div></div>
             
         </li>
@@ -565,7 +564,7 @@ then applies necessary changes to the DOM.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (cstate.error !== pstate.error) {
-      elements.error.innerText = <span class="hljs-string">""</span>;
+      elements.error.textContent = <span class="hljs-string">""</span>;
     }
   }
   <span class="hljs-keyword">var</span> lastDisplay;
@@ -594,8 +593,8 @@ updating it anytime the state is updated.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  elements.lastInStack.innerText = <span class="hljs-built_in">String</span>(lastDisplay);
-  elements.fullStack.innerText = <span class="hljs-string">"[ "</span> + cstate.stack.join(<span class="hljs-string">" "</span>) + <span class="hljs-string">" ]"</span>;
+            <div class="content"><div class='highlight'><pre>  elements.lastInStack.textContent = <span class="hljs-built_in">String</span>(lastDisplay);
+  elements.fullStack.textContent = <span class="hljs-string">"[ "</span> + cstate.stack.join(<span class="hljs-string">" "</span>) + <span class="hljs-string">" ]"</span>;
   <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
 }</pre></div></div>
             

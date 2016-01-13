@@ -53,10 +53,7 @@
               
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-meta">"use strict"</span>;
-<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">window</span>);
-<span class="hljs-keyword">var</span> <span class="hljs-built_in">window</span> = <span class="hljs-built_in">window</span> || {};
-<span class="hljs-keyword">var</span> <span class="hljs-built_in">document</span> = <span class="hljs-built_in">window</span>.document || {};</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-meta">"use strict"</span>;</pre></div></div>
             
         </li>
         
@@ -67,15 +64,16 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <h2 id="browser">browser</h2>
-<p>Runs the browser app. Meant to be the main module called when building for
+              <p>Runs the browser app. Meant to be the main module called when building for
 the browser.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>
-<span class="hljs-keyword">var</span> rpn = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./"</span>);
-<span class="hljs-keyword">var</span> BrowserApp = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./lib/browser-app"</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">root</span>) </span>{
+  <span class="hljs-keyword">var</span> <span class="hljs-built_in">document</span> = root.document || {};
+
+  <span class="hljs-keyword">var</span> rpn = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./"</span>);
+  <span class="hljs-keyword">var</span> BrowserApp = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./lib/browser-app"</span>);</pre></div></div>
             
         </li>
         
@@ -91,16 +89,16 @@ the browser.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> id = <span class="hljs-built_in">document</span>.getElementById.bind(<span class="hljs-built_in">document</span>);
-<span class="hljs-keyword">var</span> elements = {
-  container: id(<span class="hljs-string">"container"</span>),
-  input: id(<span class="hljs-string">"rpn-input"</span>),
-  submit: id(<span class="hljs-string">"submit-button"</span>),
-  clear: id(<span class="hljs-string">"clear-button"</span>),
-  error: id(<span class="hljs-string">"error-field"</span>),
-  lastInStack: id(<span class="hljs-string">"last-stack"</span>),
-  fullStack: id(<span class="hljs-string">"full-stack"</span>)
-};</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> id = <span class="hljs-built_in">document</span>.getElementById.bind(<span class="hljs-built_in">document</span>);
+  <span class="hljs-keyword">var</span> elements = {
+    container: id(<span class="hljs-string">"container"</span>),
+    input: id(<span class="hljs-string">"rpn-input"</span>),
+    submit: id(<span class="hljs-string">"submit-button"</span>),
+    clear: id(<span class="hljs-string">"clear-button"</span>),
+    error: id(<span class="hljs-string">"error-field"</span>),
+    lastInStack: id(<span class="hljs-string">"last-stack"</span>),
+    fullStack: id(<span class="hljs-string">"full-stack"</span>)
+  };</pre></div></div>
             
         </li>
         
@@ -115,7 +113,8 @@ the browser.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>(<span class="hljs-keyword">new</span> BrowserApp(elements, rpn.commonOps)).render();</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  (<span class="hljs-keyword">new</span> BrowserApp(elements, rpn.commonOps, root.requestAnimationFrame.bind(root))).render();
+}).call(<span class="hljs-built_in">window</span>, <span class="hljs-built_in">window</span>);</pre></div></div>
             
         </li>
         
